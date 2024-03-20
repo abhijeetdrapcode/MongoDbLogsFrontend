@@ -1,5 +1,6 @@
 import React from 'react';
-import AuditLog from './AuditLog';
+import AuditLog from './components/AuditLog';
+import "./App.css"
 
 function App() {
   return (
