@@ -25,6 +25,19 @@ const AuditLog = () => {
     fetchData();
   }, []);
 
+  const opeartionName = (type) => {
+    switch (type) {
+      case 'insertOperation':
+        return 'Insert';
+      case 'updateOperation':
+        return 'Update';
+      case 'removeOperation':
+        return 'Remove';
+      default:
+        return type;
+    }
+  };
+
   const handleRowClick = (operation) => {
     if (selectedOperation === operation) {
       setSelectedOperation(null);
@@ -50,7 +63,7 @@ const AuditLog = () => {
             {auditLog.map((entry, index) => (
               <React.Fragment key={index}>
                 <tr onClick={() => handleRowClick(entry)}>
-                  <td>{entry.atype}</td>
+                  <td>{opeartionName(entry.atype)}</td>
                   <td>{moment(entry.ts.$date).format('YYYY-MM-DD HH:mm:ss')}</td>
                   <td>{entry.param.ns}</td>
                   <td>{entry.users[0] ? entry.users[0].user : 'Unknown'}</td>
@@ -59,9 +72,9 @@ const AuditLog = () => {
                   <tr>
                     <td colSpan="4">
                       <div className="card">
-                        <div className="card-body">
+                        <div className="card-body" style={{ textAlign: 'left' }}>
                           <div className="mb-3">
-                            <strong>Operation Type:</strong> {selectedOperation.atype}
+                            <strong>Operation Type:</strong> {opeartionName(selectedOperation.atype)}
                           </div>
                           <div className="mb-3">
                             <strong>Timestamp:</strong> {moment(selectedOperation.ts.$date).format('YYYY-MM-DD HH:mm:ss')}
@@ -72,13 +85,13 @@ const AuditLog = () => {
                           <div className="mb-3">
                             <strong>Collection:</strong> {selectedOperation.param.ns}
                           </div>
-                          {Object.entries(selectedOperation.param.doc).map(([key, value]) => (
+                          {Object.keys(selectedOperation.param.doc).map(key => (
                             <div key={key} className="mb-3">
                               <strong>{key}:</strong>
-                              {typeof value === 'object' ? (
-                                <pre>{JSON.stringify(value, null, 2)}</pre>
+                              {typeof selectedOperation.param.doc[key] === 'object' ? (
+                                <pre>{JSON.stringify(selectedOperation.param.doc[key], null, 2)}</pre>
                               ) : (
-                                <span>{value}</span>
+                                <span>{selectedOperation.param.doc[key]}</span>
                               )}
                             </div>
                           ))}
@@ -97,3 +110,5 @@ const AuditLog = () => {
 };
 
 export default AuditLog;
+
+
