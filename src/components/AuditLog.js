@@ -46,23 +46,44 @@ const AuditLog = () => {
     }
   };
 
+  const renderObjectProperties = (obj) => {
+    return Object.entries(obj).map(([key, value]) => {
+      if (typeof value === 'object' && value !== null) {
+        return (
+          <div key={key} className="mb-3 text-center">
+            <strong>{key}:</strong>
+            <div className="ms-3">
+              {renderObjectProperties(value)}
+            </div>
+          </div>
+        );
+      } else {
+        return (
+          <div key={key} className="mb-3 text-center">
+            <strong>{key}:</strong> {value}
+          </div>
+        );
+      }
+    });
+  };
+
   return (
-    <div className="container mt-5" style={{ fontFamily: 'Arial, sans-serif' }}>
-      <h2 className='text-center text-white'>MongoDB Audit Log</h2>
-      <div className="table-responsive text-center rounded">
-        <table className="table table-bordered table-hover">
+    <div className="container mt-5">
+      <h2 className="text-center text-white mb-4">MONGODB AUDIT LOGS</h2>
+      <div className="table-responsive rounded">
+        <table className="table table-bordered table-hover text-center rounded">
           <thead className="thead-dark">
             <tr>
-              <th>Operation Type</th>
-              <th>Timestamp</th>
-              <th>Collection</th>
-              <th>User</th>
+              <th className="bg-dark text-white">Operation Type</th>
+              <th className="bg-dark text-white">Timestamp</th>
+              <th className="bg-dark text-white">Collection</th>
+              <th className="bg-dark text-white">User</th>
             </tr>
           </thead>
           <tbody>
             {auditLog.map((entry, index) => (
               <React.Fragment key={index}>
-                <tr onClick={() => handleRowClick(entry)}>
+                <tr onClick={() => handleRowClick(entry)} style={{ cursor: 'pointer' }}>
                   <td>{opeartionName(entry.atype)}</td>
                   <td>{moment(entry.ts.$date).format('YYYY-MM-DD HH:mm:ss')}</td>
                   <td>{entry.param.ns}</td>
@@ -71,8 +92,11 @@ const AuditLog = () => {
                 {selectedOperation === entry && (
                   <tr>
                     <td colSpan="4">
-                      <div className="card">
-                        <div className="card-body" style={{ textAlign: 'left' }}>
+                      <div className="card mb-4 rounded">
+                        <div className="card-header bg-dark text-white rounded-top">
+                          <h5 className="mb-0">Operation Details</h5>
+                        </div>
+                        <div className="card-body">
                           <div className="mb-3">
                             <strong>Operation Type:</strong> {opeartionName(selectedOperation.atype)}
                           </div>
@@ -85,16 +109,7 @@ const AuditLog = () => {
                           <div className="mb-3">
                             <strong>Collection:</strong> {selectedOperation.param.ns}
                           </div>
-                          {Object.keys(selectedOperation.param.doc).map(key => (
-                            <div key={key} className="mb-3">
-                              <strong>{key}:</strong>
-                              {typeof selectedOperation.param.doc[key] === 'object' ? (
-                                <pre>{JSON.stringify(selectedOperation.param.doc[key], null, 2)}</pre>
-                              ) : (
-                                <span>{selectedOperation.param.doc[key]}</span>
-                              )}
-                            </div>
-                          ))}
+                          {renderObjectProperties(selectedOperation.param.doc)}
                         </div>
                       </div>
                     </td>
@@ -110,5 +125,3 @@ const AuditLog = () => {
 };
 
 export default AuditLog;
-
-
