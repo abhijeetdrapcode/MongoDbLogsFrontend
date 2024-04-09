@@ -6,11 +6,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const AuditLog = () => {
   const [auditLog, setAuditLog] = useState([]);
   const [selectedOperation, setSelectedOperation] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api');
+        const response = await axios.get('http://localhost/api');
         const filteredLog = response.data.filter(entry => {
           return ['insertOperation', 'updateOperation', 'removeOperation'].includes(entry.atype) && 
                  entry.param.ns !== 'config.system.sessions' &&
@@ -18,7 +19,11 @@ const AuditLog = () => {
         });
         setAuditLog(filteredLog);
       } catch (error) {
-        console.error('Error fetching audit log:', error);
+        if (error.response && error.response.status === 403) {
+          setError('403 Forbidden - You are not authorized to access this resource.');
+        } else {
+          setError('Error fetching audit log: ' + error.message);
+        }
       }
     };
 
@@ -66,6 +71,16 @@ const AuditLog = () => {
       }
     });
   };
+
+  if (error) {
+    return (
+      <div className="container mt-5">
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mt-5">
